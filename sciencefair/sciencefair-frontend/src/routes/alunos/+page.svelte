@@ -3,8 +3,13 @@
 </svelte:head>
 
 <script lang="ts">
+
 	import { createAluno, deleteAluno, getAllAlunos } from '$lib/services/aluno.service';
 	import { getAllProjetos } from '$lib/services/projeto.service';
+	import { goto } from '$app/navigation';
+	import { isLoggedIn } from '$lib/utils/session';
+
+	let logado = $state(false);
 
 	let alunos = $state<any[]>([]);
 	let projetos = $state<any[]>([]);
@@ -58,27 +63,33 @@
 	}
 
 	$effect(() => {
+		logado = isLoggedIn();
 		carregarDados();
 	});
 </script>
 
+
 <h1>Cadastro de Alunos</h1>
 
-<div>
-	<input bind:value={nome} placeholder="Nome" />
-	<input bind:value={email} placeholder="Email" type="email" />
-	<input bind:value={matricula} placeholder="Matrícula" />
-	<input bind:value={turma} placeholder="Turma" />
+{#if logado}
+	<div>
+		<input bind:value={nome} placeholder="Nome" />
+		<input bind:value={email} placeholder="Email" type="email" />
+		<input bind:value={matricula} placeholder="Matrícula" />
+		<input bind:value={turma} placeholder="Turma" />
 
-	<select bind:value={projetoId}>
-		<option value="">Selecione um projeto</option>
-		{#each projetos as projeto}
-			<option value={projeto.id}>{projeto.titulo}</option>
-		{/each}
-	</select>
+		<select bind:value={projetoId}>
+			<option value="">Selecione um projeto</option>
+			{#each projetos as projeto}
+				<option value={projeto.id}>{projeto.titulo}</option>
+			{/each}
+		</select>
 
-	<button onclick={salvarAluno}>Cadastrar</button>
-</div>
+		<button onclick={salvarAluno}>Cadastrar</button>
+	</div>
+{:else}
+	<p>Você precisa estar logado para cadastrar alunos.</p>
+{/if}
 
 {#if mensagem}
 	<p>{mensagem}</p>
@@ -94,7 +105,9 @@
 				— {aluno.turma}
 				— {aluno.email}
 				— Projeto: {aluno.projeto?.titulo ?? aluno.projeto?.id}
-				<button onclick={() => excluirAluno(aluno.id)}>Excluir</button>
+				{#if logado}
+					<button onclick={() => excluirAluno(aluno.id)}>Excluir</button>
+				{/if}
 			</li>
 		{/each}
 	</ul>

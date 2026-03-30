@@ -3,7 +3,12 @@
 </svelte:head>
 
 <script lang="ts">
+
 	import { createFeira, deleteFeira, getAllFeiras } from '$lib/services/feira.service';
+	import { goto } from '$app/navigation';
+	import { isLoggedIn } from '$lib/utils/session';
+
+	let logado = $state(false);
 
 	let feiras = $state<any[]>([]);
 	let nome = $state('');
@@ -52,20 +57,26 @@
 	}
 
 	$effect(() => {
+		logado = isLoggedIn();
 		carregarFeiras();
 	});
 </script>
 
+
 <h1>Cadastro de Feiras</h1>
 
-<div>
-	<input bind:value={nome} placeholder="Nome" />
-	<input bind:value={descricao} placeholder="Descrição" />
-	<input bind:value={dataInicio} type="date" />
-	<input bind:value={dataFim} type="date" />
-	<input bind:value={local} placeholder="Local" />
-	<button onclick={salvarFeira}>Cadastrar</button>
-</div>
+{#if logado}
+	<div>
+		<input bind:value={nome} placeholder="Nome" />
+		<input bind:value={descricao} placeholder="Descrição" />
+		<input bind:value={dataInicio} type="date" />
+		<input bind:value={dataFim} type="date" />
+		<input bind:value={local} placeholder="Local" />
+		<button onclick={salvarFeira}>Cadastrar</button>
+	</div>
+{:else}
+	<p>Você precisa estar logado para cadastrar feiras.</p>
+{/if}
 
 {#if mensagem}
 	<p>{mensagem}</p>
@@ -78,7 +89,9 @@
 		{#each feiras as feira}
 			<li>
 				<strong>{feira.nome}</strong> — {feira.local}
-				<button onclick={() => excluirFeira(feira.id)}>Excluir</button>
+				{#if logado}
+					<button onclick={() => excluirFeira(feira.id)}>Excluir</button>
+				{/if}
 			</li>
 		{/each}
 	</ul>

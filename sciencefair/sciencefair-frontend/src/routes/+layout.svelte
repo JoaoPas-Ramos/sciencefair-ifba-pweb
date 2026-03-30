@@ -3,7 +3,7 @@
 </svelte:head>
 
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, afterNavigate } from '$app/navigation';
 
 	let user = $state<any>(null);
 
@@ -20,7 +20,13 @@
 		goto('/login');
 	}
 
+
 	$effect(() => {
+		carregarUsuario();
+	});
+
+
+	afterNavigate(() => {
 		carregarUsuario();
 	});
 </script>

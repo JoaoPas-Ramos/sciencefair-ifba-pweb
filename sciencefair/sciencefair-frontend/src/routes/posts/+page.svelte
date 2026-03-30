@@ -3,8 +3,13 @@
 </svelte:head>
 
 <script lang="ts">
+
 	import { createPost, deletePost, getAllPosts } from '$lib/services/post.service';
 	import { getAllProjetos } from '$lib/services/projeto.service';
+	import { goto } from '$app/navigation';
+	import { isLoggedIn } from '$lib/utils/session';
+
+	let logado = $state(false);
 
 	let posts = $state<any[]>([]);
 	let projetos = $state<any[]>([]);
@@ -56,25 +61,31 @@
 	}
 
 	$effect(() => {
+		logado = isLoggedIn();
 		carregarDados();
 	});
 </script>
 
+
 <h1>Cadastro de Posts</h1>
 
-<div>
-	<input bind:value={titulo} placeholder="Título" />
-	<textarea bind:value={conteudo} placeholder="Conteúdo"></textarea>
+{#if logado}
+	<div>
+		<input bind:value={titulo} placeholder="Título" />
+		<textarea bind:value={conteudo} placeholder="Conteúdo"></textarea>
 
-	<select bind:value={projetoId}>
-		<option value="">Selecione um projeto</option>
-		{#each projetos as projeto}
-			<option value={projeto.id}>{projeto.titulo}</option>
-		{/each}
-	</select>
+		<select bind:value={projetoId}>
+			<option value="">Selecione um projeto</option>
+			{#each projetos as projeto}
+				<option value={projeto.id}>{projeto.titulo}</option>
+			{/each}
+		</select>
 
-	<button onclick={salvarPost}>Cadastrar</button>
-</div>
+		<button onclick={salvarPost}>Cadastrar</button>
+	</div>
+{:else}
+	<p>Você precisa estar logado para cadastrar posts.</p>
+{/if}
 
 {#if mensagem}
 	<p>{mensagem}</p>
@@ -91,7 +102,9 @@
 				{#if post.dataCriacao}
 					— {formatDate(post.dataCriacao)}
 				{/if}
-				<button onclick={() => excluirPost(post.id)}>Excluir</button>
+				{#if logado}
+					<button onclick={() => excluirPost(post.id)}>Excluir</button>
+				{/if}
 			</li>
 		{/each}
 	</ul>

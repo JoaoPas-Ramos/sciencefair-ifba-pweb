@@ -3,9 +3,14 @@
 </svelte:head>
 
 <script lang="ts">
+
 	import { createProjeto, deleteProjeto, getAllProjetos } from '$lib/services/projeto.service';
 	import { getAllFeiras } from '$lib/services/feira.service';
 	import { getAllProfessores } from '$lib/services/professor.service';
+	import { goto } from '$app/navigation';
+	import { isLoggedIn } from '$lib/utils/session';
+
+	let logado = $state(false);
 
 	let projetos = $state<any[]>([]);
 	let feiras = $state<any[]>([]);
@@ -66,38 +71,44 @@
 	}
 
 	$effect(() => {
+		logado = isLoggedIn();
 		carregarDados();
 	});
 </script>
 
+
 <h1>Cadastro de Projetos</h1>
 
-<div>
-	<input bind:value={titulo} placeholder="Título" />
-	<input bind:value={descricao} placeholder="Descrição" />
-	<input bind:value={areaTematica} placeholder="Área temática" />
+{#if logado}
+	<div>
+		<input bind:value={titulo} placeholder="Título" />
+		<input bind:value={descricao} placeholder="Descrição" />
+		<input bind:value={areaTematica} placeholder="Área temática" />
 
-	<select bind:value={status}>
-		<option value="PENDENTE">PENDENTE</option>
-		<option value="APROVADO">APROVADO</option>
-	</select>
+		<select bind:value={status}>
+			<option value="PENDENTE">PENDENTE</option>
+			<option value="APROVADO">APROVADO</option>
+		</select>
 
-	<select bind:value={feiraId}>
-		<option value="">Selecione uma feira</option>
-		{#each feiras as feira}
-			<option value={feira.id}>{feira.nome}</option>
-		{/each}
-	</select>
+		<select bind:value={feiraId}>
+			<option value="">Selecione uma feira</option>
+			{#each feiras as feira}
+				<option value={feira.id}>{feira.nome}</option>
+			{/each}
+		</select>
 
-	<select bind:value={professorId}>
-		<option value="">Selecione um professor</option>
-		{#each professores as professor}
-			<option value={professor.id}>{professor.nome}</option>
-		{/each}
-	</select>
+		<select bind:value={professorId}>
+			<option value="">Selecione um professor</option>
+			{#each professores as professor}
+				<option value={professor.id}>{professor.nome}</option>
+			{/each}
+		</select>
 
-	<button onclick={salvarProjeto}>Cadastrar</button>
-</div>
+		<button onclick={salvarProjeto}>Cadastrar</button>
+	</div>
+{:else}
+	<p>Você precisa estar logado para cadastrar projetos.</p>
+{/if}
 
 {#if mensagem}
 	<p>{mensagem}</p>
@@ -114,7 +125,9 @@
 				— {projeto.status}
 				— Feira: {projeto.feira?.nome ?? projeto.feira?.id}
 				— Professor: {projeto.professor?.nome ?? projeto.professor?.id}
-				<button onclick={() => excluirProjeto(projeto.id)}>Excluir</button>
+				{#if logado}
+					<button onclick={() => excluirProjeto(projeto.id)}>Excluir</button>
+				{/if}
 			</li>
 		{/each}
 	</ul>
