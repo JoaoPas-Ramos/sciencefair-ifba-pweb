@@ -1,89 +1,161 @@
-<script lang="ts">
-	import { afterNavigate, goto } from '$app/navigation';
-	import favicon from '$lib/assets/favicon.ico';
-	import { clearAuthSession, getAuthenticatedUserName, isAdmin, isAuthenticated } from '$lib/utils/auth';
-	import './+layout.css';
-	import { onMount } from 'svelte';
-	import type { Snippet } from 'svelte';
-	import type { LayoutProps } from './$types';
-
-	let { children, data }: LayoutProps = $props();
-	let authenticatedUserName = $state<string | null>(null);
-	let authenticated = $state(false);
-	let admin = $state(false);
-
-	function syncAuthenticatedUser() {
-		authenticatedUserName = getAuthenticatedUserName();
-		authenticated = isAuthenticated();
-		admin = isAdmin();
-	}
-
-	afterNavigate(() => {
-		syncAuthenticatedUser();
-	});
-
-	onMount(() => {
-		syncAuthenticatedUser();
-		const handleAuthChange = () => syncAuthenticatedUser();
-		window.addEventListener('authchange', handleAuthChange);
-
-		return () => {
-			window.removeEventListener('authchange', handleAuthChange);
-		};
-	});
-
-	async function logout() {
-		clearAuthSession();
-		syncAuthenticatedUser();
-		await goto('/');
-	}
-</script>
-
 <svelte:head>
-	<link rel="icon" href={favicon} />
-	<title>IFBA Blog</title>
+	<title>Gerenciador de Feira de Ciências</title>
 </svelte:head>
+
+<script lang="ts">
+	import { goto } from '$app/navigation';
+
+	let user = $state<any>(null);
+
+	function carregarUsuario() {
+		if (typeof localStorage !== 'undefined') {
+			const storedUser = localStorage.getItem('user');
+			user = storedUser ? JSON.parse(storedUser) : null;
+		}
+	}
+
+	function logout() {
+		localStorage.removeItem('user');
+		user = null;
+		goto('/login');
+	}
+
+	$effect(() => {
+		carregarUsuario();
+	});
+</script>
 
 <div class="app-shell">
 	<header class="topbar">
-		<div class="topbar__inner">
-			<a class="brand" href="/" aria-label="IFBA Blog home">
-				<span class="brand__text">IFBA BLOG APP</span>
-			</a>
+		<div class="brand">
+			<a href="/">ScienceFair</a>
+		</div>
 
-			<form class="topbar__search" role="search" action="/">
-				<label class="sr-only" for="site-search">Buscar posts</label>
-				<input
-					id="site-search"
-					name="keyword"
-					type="search"
-					value={data.searchTerm}
-					placeholder="Buscar posts"
-				/>
-				<button type="submit">Buscar</button>
-			</form>
+		<nav class="menu">
+			<a href="/">Início</a>
+			<a href="/feiras">Feiras</a>
+			<a href="/professores">Professores</a>
+			<a href="/projetos">Projetos</a>
+			<a href="/alunos">Alunos</a>
+			<a href="/posts">Posts</a>
+		</nav>
 
-			<nav class="topbar__actions" aria-label="Authentication">
-				<a class="button button--ghost" href="/register">Cadastrar</a>
-				{#if admin}
-					<a class="button button--ghost" href="/posts/cadastro">Novo post</a>
-					<a class="button button--ghost" href="/categorias">Categorias</a>
-				{/if}
-				{#if authenticated}
-					<a class="button button--ghost" href="/perfil">Perfil</a>
-					<a class="button button--ghost" href="/perfil/senha">Senha</a>
-					<span class="button button--ghost button--static">{authenticatedUserName}</span>
-					<button class="button button--ghost button--danger" onclick={logout} type="button">
-						Logout
-					</button>
-				{:else}
-					<a class="button button--ghost" href="/login">Entrar</a>
-				{/if}
-			</nav>
+		<div class="user-area">
+			   {#if user}
+				   <span class="user-name">Olá, {user.nome}</span>
+				   <button class="logout-btn" onclick={logout}>Sair</button>
+			   {:else}
+				   <div class="auth-links">
+					   <a href="/login">Login</a>
+					   <a href="/register">Cadastro</a>
+				   </div>
+			   {/if}
 		</div>
 	</header>
 
-	<main class="page-content">
-		{@render children()}
+	<main class="content">
+		<slot />
 	</main>
 </div>
+
+<style>
+	:global(body) {
+		margin: 0;
+		font-family: Arial, Helvetica, sans-serif;
+		background: #f5f7fb;
+		color: #1f2937;
+	}
+
+	:global(a) {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.app-shell {
+		min-height: 100vh;
+	}
+
+	.topbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1rem 1.5rem;
+		background: #2563eb;
+		border-bottom: 1px solid #e5e7eb;
+		flex-wrap: wrap;
+	}
+
+	.brand a {
+		font-size: 1.2rem;
+		font-weight: 800;
+		color: #ffffff;
+	}
+
+	.menu {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.menu a {
+		padding: 0.5rem 0.75rem;
+		border-radius: 10px;
+		font-weight: 600;
+	}
+
+	.menu a:hover {
+		background: #eff6ff;
+		color: #2563eb;
+	}
+
+	.user-area {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+
+	   .user-name {
+		   font-weight: 600;
+	   }
+
+	   .auth-links {
+		   display: flex;
+		   gap: 0.75rem;
+		   align-items: center;
+	   }
+
+	.logout-btn {
+		border: none;
+		background: #dc2626;
+		color: white;
+		padding: 0.55rem 0.9rem;
+		border-radius: 10px;
+		cursor: pointer;
+		font-weight: 700;
+	}
+
+	.logout-btn:hover {
+		background: #b91c1c;
+	}
+
+	.content {
+		padding: 1.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.topbar {
+			align-items: flex-start;
+		}
+
+		.menu {
+			width: 100%;
+		}
+
+		.user-area {
+			width: 100%;
+			justify-content: flex-start;
+		}
+	}
+</style>

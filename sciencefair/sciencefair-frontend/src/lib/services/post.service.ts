@@ -1,5 +1,15 @@
-import type { Post } from '$lib/types/post';
 import { get, post, put, del } from '$lib/utils/http-utils';
+
+export type Post = {
+  id?: number;
+  titulo: string;
+  conteudo: string;
+  dataCriacao?: string;
+  projeto: {
+    id: number;
+    titulo?: string;
+  };
+};
 
 export async function getAllPosts(): Promise<Post[]> {
   return await get('/posts');
@@ -9,11 +19,11 @@ export async function getPostById(id: number): Promise<Post> {
   return await get(`/posts/${id}`);
 }
 
-export async function createPost(payload: Partial<Post>): Promise<Post> {
+export async function createPost(payload: Post): Promise<Post> {
   return await post('/posts', payload);
 }
 
-export async function updatePost(id: number, payload: Partial<Post>): Promise<Post> {
+export async function updatePost(id: number, payload: Post): Promise<Post> {
   return await put(`/posts/${id}`, payload);
 }
 
