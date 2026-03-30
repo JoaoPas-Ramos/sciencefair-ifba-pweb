@@ -7,9 +7,9 @@ export type User = {
 }
 
 export type UserRegistration = {
-  name: string,
+  nome: string,
   email: string,
-  password: string
+  senha: string
 }
 
 export type LoginPayload = {

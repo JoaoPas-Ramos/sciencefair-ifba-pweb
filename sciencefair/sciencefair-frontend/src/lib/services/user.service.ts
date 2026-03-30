@@ -9,7 +9,7 @@ import type {
 import { getAuthenticatedUserId } from "$lib/utils/auth";
 import { API_PATH, post, put } from "$lib/utils/http-utils";
 
-export async function createUser(user: UserRegistration): Promise<User> {
+export async function createUser(user: any): Promise<any> {
   return await post('/auth/register', user);
 }
 

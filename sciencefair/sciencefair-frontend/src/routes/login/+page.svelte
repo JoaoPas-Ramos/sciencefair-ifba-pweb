@@ -6,21 +6,19 @@
 	import { goto } from '$app/navigation';
 	import { loginUser } from '$lib/services/user.service';
 
-	type FieldErrors = Record<string, string[]>;
-
-	let email = '';
-	let password = '';
-	let isSubmitting = false;
-	let formError = '';
-	let successMessage = '';
-	let fieldErrors: FieldErrors = {};
+	let email = $state('');
+	let password = $state('');
+	let isSubmitting = $state(false);
+	let formError = $state('');
+	let successMessage = $state('');
+	let fieldErrors = $state<Record<string, string[]>>({});
 
 	function errorsFor(field: string): string[] {
 		return fieldErrors[field] ?? [];
 	}
 
 	function validate(): boolean {
-		const errors: FieldErrors = {};
+		const errors: Record<string, string[]> = {};
 
 		if (!email.trim()) {
 			errors.email = ['Informe o email.'];
@@ -39,9 +37,7 @@
 		formError = '';
 		successMessage = '';
 
-		if (!validate()) {
-			return;
-		}
+		if (!validate()) return;
 
 		isSubmitting = true;
 
@@ -72,7 +68,7 @@
 			Faça login para acessar o gerenciador da feira de ciências.
 		</p>
 
-		<form class="login-form" on:submit|preventDefault={submitForm}>
+		<form class="login-form" onsubmit={submitForm}>
 			<label>
 				<span>Email</span>
 				<input bind:value={email} type="email" placeholder="seuemail@ifba.edu.br" />

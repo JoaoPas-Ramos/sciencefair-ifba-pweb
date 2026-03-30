@@ -68,9 +68,9 @@
 
 		try {
 			await createUser({
-				name: name.trim(),
+				nome: name.trim(),
 				email: email.trim(),
-				password
+				senha: password
 			});
 
 			name = '';
@@ -78,6 +78,7 @@
 			password = '';
 			passwordConfirmation = '';
 			fieldErrors = {};
+			successMessage = 'Usuario cadastrado com sucesso.';
 			successMessage = 'Usuario cadastrado com sucesso.';
 		} catch (error) {
 			if (error instanceof ApiError) {

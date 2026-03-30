@@ -26,7 +26,7 @@ public class UserService {
         user.setNome(request.getNome());
         user.setEmail(request.getEmail());
         user.setSenha(passwordEncoder.encode(request.getSenha()));
-        user.setAtivo(false);
+        user.setAtivo(true);
         user.setRole("USER");
 
         userRepository.save(user);
